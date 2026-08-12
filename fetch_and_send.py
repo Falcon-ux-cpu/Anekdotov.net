@@ -1,6 +1,7 @@
 import os
 import re
 import time
+import random
 import shutil
 import tempfile
 import smtplib
@@ -16,8 +17,6 @@ SMTP_SERVER = "smtp.yandex.ru"
 SMTP_PORT = 465
 
 # Настройки из переменных окружения (GitHub Secrets)
-# YANDEX_USER: ваш адрес на Яндексе (например, login@yandex.ru)
-# YANDEX_APP_PASS: 16-значный пароль приложения из Яндекс ID
 YANDEX_USER = os.environ.get("GMAIL_USER")       
 YANDEX_PASSWORD = os.environ.get("GMAIL_APP_PASS") 
 RECIPIENT_EMAIL = os.environ.get("RECIPIENT_EMAIL", YANDEX_USER)
@@ -168,10 +167,10 @@ def build_single_item_html(content_html):
     </html>
     """
 
-def send_single_email(server, html_body, pic=None):
-    """Отправляет одно отдельное письмо со строгой темой Anekdotov.net."""
+def send_single_email(server, subject, html_body, pic=None):
+    """Отправляет одно отдельное письмо с динамической темой."""
     msg = MIMEMultipart('related')
-    msg['Subject'] = "Anekdotov.net"
+    msg['Subject'] = subject
     msg['From'] = YANDEX_USER
     msg['To'] = RECIPIENT_EMAIL
 
@@ -218,17 +217,21 @@ def main():
                 for i, anekdot in enumerate(anekdots, 1):
                     content_html = f'<div class="item-card">{anekdot}</div>'
                     html_body = build_single_item_html(content_html)
-                    send_single_email(server, html_body)
+                    send_single_email(server, "Anekdotov.net: анекдот", html_body)
                     print(f"Отправлен анекдот {i}/{len(anekdots)}")
-                    time.sleep(5)
+                    
+                    delay = random.randint(5, 12)
+                    time.sleep(delay)
 
                 # 2. Отправляем истории по одной
                 for i, story in enumerate(stories, 1):
                     content_html = f'<div class="item-card story-card">{story}</div>'
                     html_body = build_single_item_html(content_html)
-                    send_single_email(server, html_body)
+                    send_single_email(server, "Anekdotov.net: история", html_body)
                     print(f"Отправлена история {i}/{len(stories)}")
-                    time.sleep(5)
+                    
+                    delay = random.randint(5, 12)
+                    time.sleep(delay)
 
                 # 3. Отправляем картинки по одной
                 for i, pic in enumerate(pictures, 1):
@@ -240,9 +243,11 @@ def main():
                     </div>
                     """
                     html_body = build_single_item_html(content_html)
-                    send_single_email(server, html_body, pic=pic)
+                    send_single_email(server, "Anekdotov.net: фото", html_body, pic=pic)
                     print(f"Отправлена картинка {i}/{len(pictures)}")
-                    time.sleep(5)
+                    
+                    delay = random.randint(5, 12)
+                    time.sleep(delay)
 
             print("Все письма успешно отправлены!")
         else:
@@ -255,4 +260,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-                
+        
