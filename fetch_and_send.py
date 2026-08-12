@@ -217,7 +217,7 @@ def main():
                     html_body = build_single_item_html(content_html)
                     send_single_email(server, html_body)
                     print(f"Отправлен анекдот {i}/{len(anekdots)}")
-                    time.sleep(2)
+                    time.sleep(5)
 
                 # 2. Отправляем истории по одной
                 for i, story in enumerate(stories, 1):
@@ -225,7 +225,7 @@ def main():
                     html_body = build_single_item_html(content_html)
                     send_single_email(server, html_body)
                     print(f"Отправлена история {i}/{len(stories)}")
-                    time.sleep(2)
+                    time.sleep(5)
 
                 # 3. Отправляем картинки по одной
                 for i, pic in enumerate(pictures, 1):
@@ -239,7 +239,7 @@ def main():
                     html_body = build_single_item_html(content_html)
                     send_single_email(server, html_body, pic=pic)
                     print(f"Отправлена картинка {i}/{len(pictures)}")
-                    time.sleep(2)
+                    time.sleep(5)
 
             print("Все письма успешно отправлены!")
         else:
