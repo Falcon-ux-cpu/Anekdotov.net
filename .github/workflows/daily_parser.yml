@@ -1,0 +1,35 @@
+name: Daily Anekdotov.net Parser
+
+on:
+  # 1. Запуск по webhook от cron-job.org (или любого внешнего сервиса)
+  repository_dispatch:
+    types: [trigger_parse]
+
+  # 2. Ручной запуск из интерфейса GitHub (для тестов)
+  workflow_dispatch:
+
+
+jobs:
+  run-parser:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Чтение репозитория
+        uses: actions/checkout@v4
+
+      - name: Настройка Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Установка зависимостей
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4
+
+      - name: Запуск скрипта парсинга
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASS: ${{ secrets.GMAIL_APP_PASS }}
+          RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+        run: python fetch_and_send.py
