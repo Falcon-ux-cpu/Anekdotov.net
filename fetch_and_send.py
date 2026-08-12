@@ -11,12 +11,16 @@ from email.mime.image import MIMEImage
 import requests
 from bs4 import BeautifulSoup
 
-# --- Настройки из переменных окружения (GitHub Secrets) ---
+# --- Настройки SMTP для Яндекс.Почты ---
 SMTP_SERVER = "smtp.yandex.ru"
 SMTP_PORT = 465
-GMAIL_USER = os.environ.get("GMAIL_USER")       # Ваш Gmail
-GMAIL_PASSWORD = os.environ.get("GMAIL_APP_PASS") # Пароль приложения Gmail
-RECIPIENT_EMAIL = os.environ.get("RECIPIENT_EMAIL", GMAIL_USER)
+
+# Настройки из переменных окружения (GitHub Secrets)
+# YANDEX_USER: ваш адрес на Яндексе (например, login@yandex.ru)
+# YANDEX_APP_PASS: 16-значный пароль приложения из Яндекс ID
+YANDEX_USER = os.environ.get("GMAIL_USER")       
+YANDEX_PASSWORD = os.environ.get("GMAIL_APP_PASS") 
+RECIPIENT_EMAIL = os.environ.get("RECIPIENT_EMAIL", YANDEX_USER)
 
 BASE_URL = "https://anekdotov.net"
 
@@ -168,7 +172,7 @@ def send_single_email(server, html_body, pic=None):
     """Отправляет одно отдельное письмо со строгой темой Anekdotov.net."""
     msg = MIMEMultipart('related')
     msg['Subject'] = "Anekdotov.net"
-    msg['From'] = GMAIL_USER
+    msg['From'] = YANDEX_USER
     msg['To'] = RECIPIENT_EMAIL
 
     msg_alternative = MIMEMultipart('alternative')
@@ -187,7 +191,7 @@ def send_single_email(server, html_body, pic=None):
         except Exception as e:
             print(f"Ошибка прикрепления файла {pic['file_path']}: {e}")
 
-    server.sendmail(GMAIL_USER, RECIPIENT_EMAIL, msg.as_string())
+    server.sendmail(YANDEX_USER, RECIPIENT_EMAIL, msg.as_string())
 
 def main():
     temp_dir = tempfile.mkdtemp()
@@ -206,10 +210,9 @@ def main():
         print(f"Собрано всего элементов: {total_count} (анекдотов: {len(anekdots)}, историй: {len(stories)}, картинок: {len(pictures)}).")
 
         if total_count > 0:
-            print("Подключение к SMTP-серверу Gmail...")
-            with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-                server.starttls()
-                server.login(GMAIL_USER, GMAIL_PASSWORD)
+            print("Подключение к SMTP-серверу Яндекса (SSL:465)...")
+            with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT) as server:
+                server.login(YANDEX_USER, YANDEX_PASSWORD)
 
                 # 1. Отправляем анекдоты по одному
                 for i, anekdot in enumerate(anekdots, 1):
@@ -252,3 +255,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+                
