@@ -38,23 +38,36 @@ def fetch_page(url):
         return ""
 
 def parse_text_category(url):
-    """Парсит текстовые категории (анекдоты и истории)."""
+    """Парсит текстовые категории, группируя абзацы одного контента по ID из href."""
     html = fetch_page(url)
     if not html:
         return []
     
     soup = BeautifulSoup(html, 'html.parser')
-    items = []
+    grouped_items = {}
     
     for p in soup.find_all('p'):
         a_tag = p.find('a', href=True)
         if a_tag and ('/anekdot/all/' in a_tag['href'] or '/story/all/' in a_tag['href']):
+            # Извлекаем уникальный ID публикации из href (например, hstkpdvdnschnbl.htm)
+            item_id = a_tag['href'].split('/')[-1]
+            
             text = p.get_text().replace('\xa0', ' ').strip()
             text = re.sub(r'\s+', ' ', text)
+            
             if text:
-                items.append(text)
+                if item_id not in grouped_items:
+                    grouped_items[item_id] = []
+                if text not in grouped_items[item_id]:
+                    grouped_items[item_id].append(text)
                 
-    return items
+    # Объединяем разрозненные абзацы одной истории/анекдота в единый блок
+    final_items = []
+    for paragraphs in grouped_items.values():
+        full_text = "<br><br>".join(paragraphs)
+        final_items.append(full_text)
+                
+    return final_items
 
 def parse_pictures(url, temp_dir):
     """Скачивает картинки и собирает подписи к ним."""
@@ -213,7 +226,7 @@ def main():
             with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT) as server:
                 server.login(YANDEX_USER, YANDEX_PASSWORD)
 
-                # 1. Отправляем анекдоты по одному
+                # 1. Отправляем анекдоты
                 for i, anekdot in enumerate(anekdots, 1):
                     content_html = f'<div class="item-card">{anekdot}</div>'
                     html_body = build_single_item_html(content_html)
@@ -223,7 +236,7 @@ def main():
                     delay = random.randint(5, 12)
                     time.sleep(delay)
 
-                # 2. Отправляем истории по одной
+                # 2. Отправляем истории
                 for i, story in enumerate(stories, 1):
                     content_html = f'<div class="item-card story-card">{story}</div>'
                     html_body = build_single_item_html(content_html)
@@ -233,7 +246,7 @@ def main():
                     delay = random.randint(5, 12)
                     time.sleep(delay)
 
-                # 3. Отправляем картинки по одной
+                # 3. Отправляем картинки
                 for i, pic in enumerate(pictures, 1):
                     caption_html = f'<div class="caption">{pic["caption"]}</div>' if pic["caption"] else ""
                     content_html = f"""
@@ -260,4 +273,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-        
