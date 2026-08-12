@@ -12,8 +12,8 @@ import requests
 from bs4 import BeautifulSoup
 
 # --- Настройки из переменных окружения (GitHub Secrets) ---
-SMTP_SERVER = "smtp.gmail.com"
-SMTP_PORT = 587
+SMTP_SERVER = "smtp.yandex.ru"
+SMTP_PORT = 465
 GMAIL_USER = os.environ.get("GMAIL_USER")       # Ваш Gmail
 GMAIL_PASSWORD = os.environ.get("GMAIL_APP_PASS") # Пароль приложения Gmail
 RECIPIENT_EMAIL = os.environ.get("RECIPIENT_EMAIL", GMAIL_USER)
